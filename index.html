@@ -344,26 +344,8 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="fileUpload">Upload Document (Optional)</label>
-                        <div class="file-upload-container" id="dropZone">
-                            <input type="file" id="fileUpload" name="fileUpload" accept=".pdf,image/*">
-                            <div class="upload-placeholder">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="17 8 12 3 7 8"></polyline>
-                                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                                </svg>
-                                <span>Tap to upload PDF or Image</span>
-                                <span class="file-info" id="fileInfo">Max 20MB</span>
-                            </div>
-                        </div>
-                        <small class="error-text" id="fileError">Invalid file or too large (Max 20MB).</small>
-                    </div>
-
                     <button type="submit" id="submitBtn" class="btn-primary">
-                        <span class="btn-text">Upload & Print</span>
+                        <span class="btn-text">Submit Print Job</span>
                         <div class="spinner" id="btnSpinner" style="display: none;"></div>
                     </button>
                 </form>
@@ -381,30 +363,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('printForm');
-            const fileInput = document.getElementById('fileUpload');
-            const fileInfo = document.getElementById('fileInfo');
             const submitBtn = document.getElementById('submitBtn');
             const btnSpinner = document.getElementById('btnSpinner');
             const btnText = submitBtn.querySelector('.btn-text');
             const toast = document.getElementById('toast');
 
             const API_URL = 'http://print-test-env-env.eba-9gvrcrjp.us-east-1.elasticbeanstalk.com/order/create-config';
-
-            // File selection UI update
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    if (file.size > 20 * 1024 * 1024) {
-                        alert('File too large (Max 20MB)');
-                        fileInput.value = '';
-                        fileInfo.textContent = 'Max 20MB';
-                        return;
-                    }
-                    fileInfo.textContent = file.name;
-                } else {
-                    fileInfo.textContent = 'Max 20MB';
-                }
-            });
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -423,37 +387,34 @@
                 btnText.style.opacity = '0.5';
 
                 try {
-                    const file = fileInput.files[0];
-                    let payload = {
+                    const payload = {
                         copies: copies,
                         color_mode: parseInt(document.getElementById('color_mode').value),
                         sides: parseInt(document.getElementById('sides').value),
                         pages_per_sheet: parseInt(document.getElementById('pages_per_sheet').value)
                     };
 
-                    // If file is present, add it to payload as Base64 (based on previous backend upgrade)
-                    if (file) {
-                        const base64 = await fileToBase64(file);
-                        payload.fileName = file.name;
-                        payload.fileBase64 = base64;
-                    }
-
                     const response = await fetch(API_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
                         body: JSON.stringify(payload)
                     });
 
                     if (response.ok) {
                         showToast('Print job submitted successfully!', 'success');
                         form.reset();
-                        fileInfo.textContent = 'Max 20MB';
                     } else {
-                        showToast('Failed to connect. Please try again.', 'error');
+                        // Attempt to read error message if any
+                        const errorRes = await response.text();
+                        console.error('API Error:', errorRes);
+                        showToast('Failed to submit. Status: ' + response.status, 'error');
                     }
                 } catch (error) {
-                    console.error(error);
-                    showToast('Network error. Check your connection.', 'error');
+                    console.error('Fetch error:', error);
+                    showToast('Connection error. Check your internet or CORS settings.', 'error');
                 } finally {
                     submitBtn.disabled = false;
                     btnSpinner.style.display = 'none';
@@ -462,8 +423,11 @@
             });
 
             function showError(id, isVisible) {
-                const el = document.getElementById(id).closest('.form-group');
-                isVisible ? el.classList.add('error') : el.classList.remove('error');
+                const el = document.getElementById(id);
+                if (el) {
+                    const group = el.closest('.form-group');
+                    isVisible ? group.classList.add('error') : group.classList.remove('error');
+                }
             }
 
             function showToast(msg, type) {
@@ -471,15 +435,6 @@
                 document.getElementById('toastIcon').textContent = type === 'success' ? '✅' : '❌';
                 toast.className = `toast show ${type}`;
                 setTimeout(() => toast.classList.remove('show'), 4000);
-            }
-
-            function fileToBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
             }
         });
     </script>
