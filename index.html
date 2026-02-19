@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Print | Elite Print Utility</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --success: #10b981;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--primary);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        main {
+            flex: 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            margin-bottom: 24px;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-header p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        .file-upload-container {
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .file-upload-container:hover,
+        .file-upload-container.dragover {
+            border-color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.02);
+        }
+
+        #fileUpload {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+
+        .upload-placeholder svg {
+            margin-bottom: 4px;
+        }
+
+        .file-info {
+            font-size: 0.75rem !important;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius);
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .error-text {
+            color: var(--error);
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-group.error input,
+        .form-group.error .file-upload-container {
+            border-color: var(--error);
+        }
+
+        .form-group.error .error-text {
+            display: block;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            width: max-content;
+            max-width: 90%;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.error {
+            background-color: var(--error);
+        }
+
+        .toast.success {
+            background-color: var(--success);
+        }
+
+        @media (max-width: 400px) {
+            .app-container {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9V2H18V9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path
+                        d="M6 18H4C3.46957 18 2.96086 17.7893 2.58579 17.4142C2.21071 17.0391 2 16.5304 2 16V11C2 10.4696 2.21071 9.96086 2.58579 9.58579C2.96086 9.21071 3.46957 9 4 9H20C20.5304 9 21.0391 9.21071 21.4142 9.58579C21.7893 9.96086 22 10.4696 22 11V16C22 16.5304 21.7893 17.0391 21.4142 17.4142C21.0391 17.7893 20.5304 18 20 18H18"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M6 14H18V22H6V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <h1>Elite Print</h1>
+            </div>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <h2>Mobile Print Setup</h2>
+                    <p>Enter details and upload your file.</p>
+                </div>
+
+                <form id="printForm">
+                    <div class="form-group">
+                        <label for="copies">Number of Copies</label>
+                        <input type="number" id="copies" name="copies" min="1" value="1" required placeholder="e.g. 1">
+                        <small class="error-text" id="copiesError">Please enter a positive number of copies.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color_mode">Color Mode</label>
+                        <select id="color_mode" name="color_mode" required>
+                            <option value="0">Black & White</option>
+                            <option value="1">Color</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sides">Sides</label>
+                        <select id="sides" name="sides" required>
+                            <option value="1">Only Front</option>
+                            <option value="2">Front & Back</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pages_per_sheet">Pages Per Sheet</label>
+                        <select id="pages_per_sheet" name="pages_per_sheet" required>
+                            <option value="1">1 &times; 1</option>
+                            <option value="2">2 &times; 1</option>
+                            <option value="4">4 &times; 1</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fileUpload">Upload Document (Optional)</label>
+                        <div class="file-upload-container" id="dropZone">
+                            <input type="file" id="fileUpload" name="fileUpload" accept=".pdf,image/*">
+                            <div class="upload-placeholder">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Tap to upload PDF or Image</span>
+                                <span class="file-info" id="fileInfo">Max 20MB</span>
+                            </div>
+                        </div>
+                        <small class="error-text" id="fileError">Invalid file or too large (Max 20MB).</small>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-primary">
+                        <span class="btn-text">Upload & Print</span>
+                        <div class="spinner" id="btnSpinner" style="display: none;"></div>
+                    </button>
+                </form>
+            </div>
+        </main>
+
+        <div id="toast" class="toast">
+            <div class="toast-content">
+                <span id="toastIcon">✅</span>
+                <span id="toastMessage">Success!</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('printForm');
+            const fileInput = document.getElementById('fileUpload');
+            const fileInfo = document.getElementById('fileInfo');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const toast = document.getElementById('toast');
+
+            const API_URL = 'http://print-test-env-env.eba-9gvrcrjp.us-east-1.elasticbeanstalk.com/order/create-config';
+
+            // File selection UI update
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 20 * 1024 * 1024) {
+                        alert('File too large (Max 20MB)');
+                        fileInput.value = '';
+                        fileInfo.textContent = 'Max 20MB';
+                        return;
+                    }
+                    fileInfo.textContent = file.name;
+                } else {
+                    fileInfo.textContent = 'Max 20MB';
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Validation
+                const copies = parseInt(document.getElementById('copies').value);
+                if (isNaN(copies) || copies < 1) {
+                    showError('copies', true);
+                    return;
+                }
+                showError('copies', false);
+
+                // UI Loading state
+                submitBtn.disabled = true;
+                btnSpinner.style.display = 'block';
+                btnText.style.opacity = '0.5';
+
+                try {
+                    const file = fileInput.files[0];
+                    let payload = {
+                        copies: copies,
+                        color_mode: parseInt(document.getElementById('color_mode').value),
+                        sides: parseInt(document.getElementById('sides').value),
+                        pages_per_sheet: parseInt(document.getElementById('pages_per_sheet').value)
+                    };
+
+                    // If file is present, add it to payload as Base64 (based on previous backend upgrade)
+                    if (file) {
+                        const base64 = await fileToBase64(file);
+                        payload.fileName = file.name;
+                        payload.fileBase64 = base64;
+                    }
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        showToast('Print job submitted successfully!', 'success');
+                        form.reset();
+                        fileInfo.textContent = 'Max 20MB';
+                    } else {
+                        showToast('Failed to connect. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showToast('Network error. Check your connection.', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    btnSpinner.style.display = 'none';
+                    btnText.style.opacity = '1';
+                }
+            });
+
+            function showError(id, isVisible) {
+                const el = document.getElementById(id).closest('.form-group');
+                isVisible ? el.classList.add('error') : el.classList.remove('error');
+            }
+
+            function showToast(msg, type) {
+                document.getElementById('toastMessage').textContent = msg;
+                document.getElementById('toastIcon').textContent = type === 'success' ? '✅' : '❌';
+                toast.className = `toast show ${type}`;
+                setTimeout(() => toast.classList.remove('show'), 4000);
+            }
+
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
